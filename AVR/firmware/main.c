@@ -5,22 +5,36 @@
  */
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 
 
 void usartinit();
-void enablePushButtonInput();
+void ADCinit();
+void sendData();
+
+char readenValue[4];
 
 int main(void)
 {
     usartinit();
-    enablePushButtonInput();
+    ADCinit();
+
+    ADCSRA |= 1 << ADSC;
+    sei();
+
     while(1) {
-        if( PINB & 0x10 ) {
-          _delay_ms(200);
-          UDR0 = '0';
-        }
     }
+}
+
+void sendData () {
+  char i = 0;
+  for(i; i<4;i++) {
+    _delay_ms(50);
+    UDR0 = readenValue[i];
+  }
+  UDR0 = '\r';
+  UDR0 = '\n';
 }
 
 void usartinit() {
@@ -29,7 +43,20 @@ void usartinit() {
   UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
-void enablePushButtonInput() {
-  DDRB = 0x00;
-  PORTB = 0x00;
+void ADCinit() {
+  ADMUX |= 1 << REFS0; //
+  ADMUX |= 1 << ADLAR; //
+
+  ADCSRA |= 1 << ADEN; //Turn On convertion
+  ADCSRA |= 1 << ADPS2; //set prescale to 16
+  ADCSRA |= 1 << ADIE; //Enable interrupts
+}
+
+
+ISR(ADC_vect) {
+  itoa(ADCH, readenValue,10);
+  sendData();
+
+  ADCSRA |= 1 << ADSC;
+
 }
