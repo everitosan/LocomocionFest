@@ -17,9 +17,9 @@
 #                   default_serial = "avrdoper"
 # FUSES ........ Parameters for avrdude to flash the fuses appropriately.
 
-DEVICE     = atmega8
-CLOCK      = 8000000
-PROGRAMMER = #-c stk500v2 -P avrdoper
+DEVICE     = atmega48p
+CLOCK      = 1000000
+PROGRAMMER = -c USBasp
 OBJECTS    = main.o
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0x24:m
 
