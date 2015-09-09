@@ -30,10 +30,10 @@ int main(void)
 void sendData () {
   char i = 0;
   for(i; i<4;i++) {
-    _delay_ms(50);
+    _delay_ms(2);
     UDR0 = readenValue[i];
   }
-  UDR0 = '\r';
+  
   UDR0 = '\n';
 }
 
