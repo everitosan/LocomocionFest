@@ -30,14 +30,7 @@ int main(void)
 void sendData (char d) {
 
   UDR0 = d; //enviamos el identificador del ADC
-
-  char i = 0;
-  for(i; i<4;i++) {
-    _delay_ms(2);
-    UDR0 = readenValue[i];
-  }
   
-  UDR0 = '\n';
 }
 
 void usartinit() {
@@ -60,24 +53,25 @@ ISR(ADC_vect) {
   uint8_t thelow = ADCL;
   uint16_t tenBitResult = ADCH <<8 | thelow;
 
+  char signa;
 
   switch(ADMUX) {
     case 0x40: //0b 0100 0000 => 60
       itoa(tenBitResult, readenValue,10);
-      sendData('1');
-      ADMUX = 0x42;
+      if (tenBitResult > 767) {
+        signa = 0b00110001; //0x31
+      }
+      else {
+        signa = 0b00110000; //0x30
+      }
+      
         break;
-
-
-    case 0x42: //0b 0100 0010 => 62
-      itoa(tenBitResult, readenValue,10);
-      sendData('2');
-      ADMUX = 0x40;
-      break;
 
     default:  
       break;
   }
+
+  sendData(signa);
 
   
   _delay_ms(8);
