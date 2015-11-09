@@ -11,7 +11,7 @@
 
 void usartinit();
 void ADCinit();
-void sendData();
+void sendData(char d);
 
 char readenValue[4];
 
@@ -27,14 +27,10 @@ int main(void)
     }
 }
 
-void sendData () {
-  char i = 0;
-  for(i; i<4;i++) {
-    _delay_ms(2);
-    UDR0 = readenValue[i];
-  }
+void sendData (char d) {
+
+  UDR0 = d; //enviamos el identificador del ADC
   
-  UDR0 = '\n';
 }
 
 void usartinit() {
@@ -45,7 +41,7 @@ void usartinit() {
 
 void ADCinit() {
   ADMUX |= 1 << REFS0; //
-  ADMUX |= 1 << ADLAR; //
+  //ADMUX |= 1 << ADLAR; //Left ajust of ADC
 
   ADCSRA |= 1 << ADEN; //Turn On convertion
   ADCSRA |= 1 << ADPS2; //set prescale to 16
@@ -54,9 +50,31 @@ void ADCinit() {
 
 
 ISR(ADC_vect) {
-  itoa(ADCH, readenValue,10);
-  sendData();
+  uint8_t thelow = ADCL;
+  uint16_t tenBitResult = ADCH <<8 | thelow;
 
+  char signa;
+
+  switch(ADMUX) {
+    case 0x40: //0b 0100 0000 => 60
+      itoa(tenBitResult, readenValue,10);
+      if (tenBitResult > 767) {
+        signa = 0b00110001; //0x31
+      }
+      else {
+        signa = 0b00110000; //0x30
+      }
+      
+        break;
+
+    default:  
+      break;
+  }
+
+  sendData(signa);
+
+  
+  _delay_ms(8);
   ADCSRA |= 1 << ADSC;
 
 }

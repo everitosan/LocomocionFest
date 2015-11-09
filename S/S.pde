@@ -22,13 +22,26 @@ void setup () {
   myPort = new Serial(this, portName, 9600);
 
   server = new SyphonServer(this, "Processing Syphon");
-  //background(0);
+  paintBg();
+}
+
+void paintBg() {
+  canvas.beginDraw();
+  canvas.background(0);
+  canvas.endDraw();
+  image(canvas, 0, 0);
+  server.sendImage(canvas);
 }
 
 void draw () {
   canvas.beginDraw();
-  canvas.background(0);
-  canvas.stroke(0,255,0);
+  if(y1 >700) {
+    canvas.background(255, 0, 0);
+   }
+   else {
+     canvas.background(0,0,0);
+   }
+  
   canvas.strokeWeight(3);
   canvas.line(x1, y1, x2, y2);
   canvas.endDraw();
@@ -37,9 +50,8 @@ void draw () {
   server.sendImage(canvas);
       
   if (xPos >= width) {
-    background(0);
     xPos = 0;
-      
+    paintBg();
   } else {
     // increment the horizontal position:
     xPos+=rango;
